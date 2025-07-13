@@ -12,6 +12,9 @@ export const setupServer = () => {
 
   app.use(cors());
   app.use(express.json());
+  app.get('/', (req, res) => {
+  res.json({ message: 'Server is up and running!' });
+});
 
   app.use('/contacts', contactsRouter);
 

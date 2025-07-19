@@ -1,7 +1,7 @@
 import { Contact } from '../db/models/contactModel.js';
 
-export const getAllContacts = async () => {
-  const contacts = await Contact.find({});
+export const getAllContacts = async ({ query = {}, skip = 0, limit = 10, sort = {} }) => {
+  const contacts = await Contact.find(query).skip(skip).limit(limit).sort(sort);
   return contacts;
 };
 
@@ -23,4 +23,8 @@ export const updateContact = async (contactId, updateData) => {
 
 export const deleteContact = async (contactId) => {
   return await Contact.findByIdAndDelete(contactId);
+};
+
+export const countContacts = async (query = {}) => {
+  return Contact.countDocuments(query);
 };

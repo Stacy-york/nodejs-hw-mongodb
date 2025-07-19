@@ -3,11 +3,32 @@ import * as contactsService from '../services/contacts.js';
 import mongoose from 'mongoose';
 
 export const getAllContacts = async (req, res) => {
-  const contacts = await contactsService.getAllContacts();
+  const { page = 1, perPage = 10, sortBy = 'name', sortOrder = 'asc' } = req.query;
+
+  const skip = (page - 1) * perPage;
+  const sort = { [sortBy]: sortOrder === 'desc' ? -1 : 1 };
+
+  const totalItems = await contactsService.countContacts();
+  const totalPages = Math.ceil(totalItems / perPage);
+
+   const contacts = await contactsService.getAllContacts({
+    skip,
+    limit: Number(perPage),
+    sort
+  });
+
   res.json({
     status: 200,
     message: 'Successfully found contacts!',
-    data: contacts,
+    data: {
+      data: contacts,
+      page: Number(page),
+      perPage: Number(perPage),
+      totalItems,
+      totalPages,
+      hasPreviousPage: page > 1,
+      hasNextPage: page < totalPages,
+    },
   });
 };
 

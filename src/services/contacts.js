@@ -1,28 +1,23 @@
 import { Contact } from '../db/models/contactModel.js';
 
-export const getAllContacts = async ({ query = {}, skip = 0, limit = 10, sort = {} }) => {
-  const contacts = await Contact.find(query).skip(skip).limit(limit).sort(sort);
-  return contacts;
+export const getAllContacts = async ({ userId, query = {}, skip = 0, limit = 10, sort = {} }) => {
+  return await Contact.find({ ...query, userId }).skip(skip).limit(limit).sort(sort);
 };
 
-export const getContactById = async (contactId) => {
-  return await Contact.findById(contactId);
+export const getContactById = async (contactId, userId) => {
+  return await Contact.findOne({ _id: contactId, userId });
 };
 
-export const createContact = async (contactData) => {
-  const contact = await Contact.create(contactData);
-  return contact;
+export const createContact = async (contactData, userId) => {
+  return await Contact.create({ ...contactData, userId });
 };
 
-export const updateContact = async (contactId, updateData) => {
-  return await Contact.findByIdAndUpdate(contactId, updateData, {
-    new: true,
-    runValidators: true,
-  });
+export const updateContact = async (contactId, updateData, userId) => {
+  return await Contact.findOneAndUpdate({ _id: contactId, userId }, updateData, { new: true, runValidators: true });
 };
 
-export const deleteContact = async (contactId) => {
-  return await Contact.findByIdAndDelete(contactId);
+export const deleteContact = async (contactId, userId) => {
+  return await Contact.findOneAndDelete({ _id: contactId, userId });
 };
 
 export const countContacts = async (query = {}) => {

@@ -7,7 +7,7 @@ export const getAllContacts = async (req, res) => {
 
   const sort = { [sortBy]: sortOrder === 'desc' ? -1 : 1 };
 
-  const totalItems = await contactsService.countContacts();
+  const totalItems = await contactsService.countContacts({ userId: req.user._id });
   const totalPages = Math.ceil(totalItems / perPage);
 
   const contacts = await contactsService.getAllContacts({

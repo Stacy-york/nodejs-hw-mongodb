@@ -2,6 +2,11 @@ import * as authService from '../services/auth.js';
 import { ctrlWrapper } from '../utils/ctrlWrapper.js';
 import { HttpError } from '../utils/HttpError.js';
 import { Session } from '../db/models/sessionModel.js';
+import jwt from 'jsonwebtoken';
+import { getEnvVar } from '../utils/getEnvVar.js';
+import { sendEmail } from '../utils/sendEmail.js';
+import { SMTP } from '../constants/index.js';
+import { User } from '../db/models/userModel.js';
 
 export const register = ctrlWrapper(async (req, res) => {
   const user = await authService.register(req.body);
@@ -83,3 +88,47 @@ export const logout = ctrlWrapper(async (req, res) => {
 
   res.status(204).send();
 });
+
+export const sendResetEmail = ctrlWrapper(async (req, res) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw HttpError(404, 'User not found');
+  }
+
+  const resetToken = jwt.sign(
+    {
+      sub: user._id,
+      email,
+    },
+    getEnvVar('JWT_SECRET'),
+    {
+      expiresIn: '5m',
+    }
+  );
+
+  const resetLink = `http://localhost:3000/reset-password?token=${resetToken}`;
+
+  await sendEmail({
+    from: getEnvVar(SMTP.SMTP_FROM),
+    to: email,
+    subject: 'Reset your password',
+    html: `<p>Click <a href="${resetLink}">here</a> to reset your password!</p>`,
+  });
+
+  res.status(200).json({
+    status: 200,
+    message: 'Reset email sent successfully!',
+  });
+});
+
+export const resetPasswordController = async (req, res) => {
+  await authService.resetPassword(req.body);
+
+  res.status(200).json({
+    status: 200,
+    message: 'Password has been successfully reset.',
+    data: {},
+  });
+};

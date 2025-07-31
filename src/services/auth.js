@@ -1,9 +1,12 @@
 import { User } from '../db/models/userModel.js';
 import { Session } from '../db/models/sessionModel.js';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import createHttpError from 'http-errors';
 import { randomBytes } from 'crypto';
 import { HttpError } from '../utils/HttpError.js';
 import { FIFTEEN_MINUTES, THIRTY_DAYS } from '../constants/index.js';
+import { getEnvVar } from '../utils/getEnvVar.js';
 
 export const register = async ({ name, email, password }) => {
   const existingUser = await User.findOne({ email });
@@ -71,4 +74,32 @@ export const logout = async (refreshToken) => {
   if (!deletedSession) {
     throw HttpError(401, 'Invalid refresh token');
   }
+};
+
+export const resetPassword = async (payload) => {
+  let decoded;
+
+  try {
+    decoded = jwt.verify(payload.token, getEnvVar('JWT_SECRET'));
+  } catch  {
+    throw createHttpError(401, 'Token is expired or invalid.');
+  }
+
+  const user = await User.findOne({
+    email: decoded.email,
+    _id: decoded.sub,
+  });
+
+  if (!user) {
+    throw createHttpError(404, 'User not found!');
+  }
+
+  const hashedPassword = await bcrypt.hash(payload.password, 10);
+
+  await User.updateOne(
+    { _id: user._id },
+    { password: hashedPassword }
+  );
+
+  await Session.deleteMany({ userId: user._id });
 };

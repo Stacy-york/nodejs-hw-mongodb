@@ -6,6 +6,7 @@ import authRouter from './routers/auth.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import cookieParser from 'cookie-parser';
+import { UPLOAD_DIR } from './constants/index.js';
 
 const logger = pino();
 
@@ -21,6 +22,7 @@ export const setupServer = () => {
 
   app.use('/contacts', contactsRouter);
   app.use('/auth', authRouter);
+  app.use('/uploads', express.static(UPLOAD_DIR));
 
   app.use(notFoundHandler);
   app.use(errorHandler);

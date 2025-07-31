@@ -1,6 +1,7 @@
 import { HttpError } from '../utils/HttpError.js';
 import * as contactsService from '../services/contacts.js';
 import mongoose from 'mongoose';
+import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js';
 
 export const getAllContacts = async (req, res) => {
   const { page = 1, perPage = 10, sortBy = 'name', sortOrder = 'asc' } = req.query;
@@ -53,7 +54,16 @@ export const getContactById = async (req, res) => {
 };
 
 export const createContact = async (req, res) => {
-  const newContact = await contactsService.createContact(req.body, req.user._id);
+  let photoUrl = '';
+
+  if (req.file) {
+    photoUrl = await saveFileToCloudinary(req.file);
+  }
+
+  const newContact = await contactsService.createContact(
+    { ...req.body, photo: photoUrl },
+    req.user._id
+  );
 
   res.status(201).json({
     status: 201,
@@ -69,7 +79,18 @@ export const updateContact = async (req, res) => {
     throw HttpError(404, 'Contact not found');
   }
 
-  const updatedContact = await contactsService.updateContact(contactId, req.body, req.user._id);
+  let photoUrl;
+
+  if (req.file) {
+    photoUrl = await saveFileToCloudinary(req.file);
+  }
+
+  const updatedData = { ...req.body };
+  if (photoUrl) {
+    updatedData.photo = photoUrl;
+  }
+
+  const updatedContact = await contactsService.updateContact(contactId, updatedData, req.user._id);
 
   if (!updatedContact) {
     throw HttpError(404, 'Contact not found');

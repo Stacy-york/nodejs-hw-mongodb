@@ -1,0 +1,89 @@
+tags:
+  - Contacts
+summary: Get list of contacts
+operationId: getContacts
+description: Retrieve paginated list of contacts belonging to the authenticated user, with optional sorting.
+security:
+  - bearerAuth: []
+parameters:
+  - in: query
+    name: page
+    schema:
+      type: integer
+      default: 1
+    description: Page number
+    example: 1
+  - in: query
+    name: perPage
+    schema:
+      type: integer
+      default: 10
+    description: Items per page
+    example: 10
+  - in: query
+    name: sortBy
+    schema:
+      type: string
+      example: name
+    description: Field to sort by (e.g., name)
+  - in: query
+    name: sortOrder
+    schema:
+      type: string
+      enum: ['asc', 'desc']
+      default: asc
+    description: Sort order
+    example: asc
+responses:
+  '200':
+    description: Successfully found contacts!
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - status
+            - message
+            - data
+          properties:
+            status:
+              type: integer
+              example: 200
+            message:
+              type: string
+              example: Successfully found contacts!
+            data:
+              type: object
+              required:
+                - data
+                - page
+                - perPage
+                - totalItems
+                - totalPages
+                - hasNextPage
+                - hasPreviousPage
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: ../../components/schemas/contact.yaml
+                page:
+                  type: number
+                  example: 1
+                perPage:
+                  type: number
+                  example: 10
+                totalItems:
+                  type: number
+                  example: 42
+                totalPages:
+                  type: number
+                  example: 5
+                hasNextPage:
+                  type: boolean
+                  example: true
+                hasPreviousPage:
+                  type: boolean
+                  example: false
+  '401':
+    $ref: '../../components/responses/401.yaml'

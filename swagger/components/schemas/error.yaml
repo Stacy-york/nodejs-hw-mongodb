@@ -1,0 +1,15 @@
+type: object
+required:
+  - status
+  - message
+  - data
+properties:
+  status:
+    type: integer
+    example: 404
+  message:
+    type: string
+    example: Contact not found
+  data:
+    type: string
+    example: 'Contact not found'

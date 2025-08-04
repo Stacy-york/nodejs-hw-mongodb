@@ -1,0 +1,64 @@
+tags:
+  - Contacts
+summary: Update existing contact
+operationId: updateContact
+description: Update fields of a contact belonging to the authenticated user. Photo can be replaced.
+security:
+  - bearerAuth: []
+parameters:
+  - in: path
+    name: contactId
+    required: true
+    schema:
+      type: string
+      example: '68737f5bd9efb5b95f74487f'
+requestBody:
+  required: true
+  content:
+    multipart/form-data:
+      schema:
+        type: object
+        properties:
+          name:
+            type: string
+            example: 'Jane Doe'
+          phoneNumber:
+            type: string
+            example: '+380987654321'
+          email:
+            type: string
+            example: 'jane@example.com'
+          isFavourite:
+            type: boolean
+            example: true
+          contactType:
+            type: string
+            enum: ['work', 'home', 'personal']
+          photo:
+            type: string
+            format: binary
+responses:
+  '200':
+    description: Successfully patched a contact!
+    content:
+      application/json:
+        schema:
+          type: object
+          required: [status, message, data]
+          properties:
+            status:
+              type: integer
+              example: 200
+            message:
+              type: string
+              example: Successfully patched a contact!
+            data:
+              $ref: '../../../components/schemas/contact.yaml'
+  '401':
+    $ref: '../../../components/responses/401.yaml'
+  '404':
+    description: Contact not found
+    content:
+      application/json:
+        schema:
+          $ref: '../../../components/schemas/error.yaml'

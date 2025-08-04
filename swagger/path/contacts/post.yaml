@@ -1,0 +1,56 @@
+tags:
+  - Contacts
+summary: Create a new contact
+operationId: createContact
+description: Create a contact for the authenticated user. Supports photo upload.
+security:
+  - bearerAuth: []
+requestBody:
+  required: true
+  content:
+    multipart/form-data:
+      schema:
+        type: object
+        required:
+          - name
+          - phoneNumber
+          - contactType
+        properties:
+          name:
+            type: string
+            example: 'John Doe'
+          phoneNumber:
+            type: string
+            example: '+380123456789'
+          email:
+            type: string
+            example: 'john@example.com'
+          isFavourite:
+            type: boolean
+            example: false
+          contactType:
+            type: string
+            enum: ['work', 'home', 'personal']
+            example: 'personal'
+          photo:
+            type: string
+            format: binary
+responses:
+  '201':
+    description: Successfully created a contact!
+    content:
+      application/json:
+        schema:
+          type: object
+          required: [status, message, data]
+          properties:
+            status:
+              type: integer
+              example: 201
+            message:
+              type: string
+              example: Successfully created a contact!
+            data:
+              $ref: '../../../swagger/components/schemas/contact.yaml'
+  '401':
+    $ref: '../../../swagger/components/responses/401.yaml'
